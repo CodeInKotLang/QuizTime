@@ -118,7 +118,7 @@ private fun HeaderSection(
 }
 
 @Composable
-fun QuizTopicSection(
+private fun QuizTopicSection(
     modifier: Modifier = Modifier,
     quizTopics: List<QuizTopic>,
     isTopicsLoading: Boolean,
