@@ -3,13 +3,17 @@ package com.synac.quiztime.presentation.quiz
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -23,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.synac.quiztime.domain.model.QuizQuestion
 import com.synac.quiztime.domain.model.UserAnswer
@@ -49,8 +54,10 @@ fun QuizScreen(
         onDialogDismiss = {},
         onConfirmButtonClick = {}
     )
-    
-    Column(modifier = Modifier.fillMaxSize()) {
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         QuizScreenTopBar(
             title = state.topBarTitle,
             onExitQuizButtonClick = {}
@@ -163,6 +170,7 @@ private fun QuestionNavigationRow(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun QuestionItem(
     modifier: Modifier = Modifier,
@@ -182,15 +190,19 @@ private fun QuestionItem(
             style = MaterialTheme.typography.headlineSmall
         )
         Spacer(modifier = Modifier.height(10.dp))
-        currentQuestion.allOptions.forEach { option ->
-            OptionItem(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp),
-                option = option,
-                isSelected = option == selectedAnswer,
-                onClick = { onOptionSelected(currentQuestion.id, option) }
-            )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            currentQuestion.allOptions.forEach { option ->
+                OptionItem(
+                    modifier = Modifier
+                        .widthIn(min = 400.dp)
+                        .padding(vertical = 10.dp),
+                    option = option,
+                    isSelected = option == selectedAnswer,
+                    onClick = { onOptionSelected(currentQuestion.id, option) }
+                )
+            }
         }
     }
 }
@@ -220,7 +232,7 @@ private fun OptionItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
-                selected = false,
+                selected = isSelected,
                 onClick = onClick
             )
             Text(
@@ -232,7 +244,8 @@ private fun OptionItem(
 }
 
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
+@PreviewScreenSizes
 @Composable
 private fun PreviewQuizScreen() {
     val dummyQuestions = List(size = 10) { index ->
@@ -252,8 +265,7 @@ private fun PreviewQuizScreen() {
     QuizScreen(
         state = QuizState(
             questions = dummyQuestions,
-            answers = dummyAnswers,
-            isExitQuizDialogOpen = true
+            answers = dummyAnswers
         )
     )
 }
