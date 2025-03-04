@@ -37,7 +37,9 @@ import com.synac.quiztime.presentation.theme.CustomGreen
 
 @Composable
 fun ResultScreen(
-    state: ResultState
+    state: ResultState,
+    onReportIconClick: (String) -> Unit,
+    onStartNewQuiz: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -71,7 +73,7 @@ fun ResultScreen(
                 QuestionItem(
                     question = question,
                     userSelectedAnswer = userAnswer,
-                    onReportIconClick = {}
+                    onReportIconClick = { onReportIconClick(question.id) }
                 )
             }
         }
@@ -79,7 +81,7 @@ fun ResultScreen(
             modifier = Modifier
                 .padding(10.dp)
                 .align(Alignment.CenterHorizontally),
-            onClick = {}
+            onClick = onStartNewQuiz
         ) {
             Text(
                 modifier = Modifier.padding(horizontal = 10.dp),
@@ -96,12 +98,12 @@ private fun Scorecard(
     correctAnswerCount: Int,
     totalQuestions: Int,
 ) {
-    val resultText = when(scorePercentage) {
+    val resultText = when (scorePercentage) {
         in 71..100 -> "Congratulations!\nA great performance!"
         in 41..70 -> "You did well,\nbut there's room for improvement"
         else -> "You may have struggled this time.\nMistakes are part of learning, keep going!"
     }
-    val resultIconResId = when(scorePercentage) {
+    val resultIconResId = when (scorePercentage) {
         in 71..100 -> R.drawable.ic_laugh
         in 41..70 -> R.drawable.ic_smiley
         else -> R.drawable.ic_sad
@@ -159,7 +161,7 @@ private fun QuestionItem(
             }
         }
         question.allOptions.forEachIndexed { index, option ->
-            val letter = when(index) {
+            val letter = when (index) {
                 0 -> "(a) "
                 1 -> "(b) "
                 2 -> "(c) "
@@ -210,6 +212,8 @@ private fun PreviewResultScreen() {
             totalQuestions = 10,
             quizQuestions = dummyQuestions,
             userAnswers = dummyAnswers
-        )
+        ),
+        onReportIconClick = {},
+        onStartNewQuiz = {}
     )
 }

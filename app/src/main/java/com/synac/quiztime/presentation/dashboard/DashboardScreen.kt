@@ -37,7 +37,8 @@ import com.synac.quiztime.presentation.dashboard.component.UserStatisticsCard
 
 @Composable
 fun DashboardScreen(
-    state: DashboardState
+    state: DashboardState,
+    onTopicCardClick: (Int) -> Unit
 ) {
 
     NameEditDialog(
@@ -64,7 +65,8 @@ fun DashboardScreen(
             quizTopics = state.quizTopics,
             isTopicsLoading = state.isLoading,
             errorMessage = state.errorMessage,
-            onRefreshIconClick = {}
+            onRefreshIconClick = {},
+            onTopicCardClick = onTopicCardClick
         )
     }
 }
@@ -123,7 +125,8 @@ private fun QuizTopicSection(
     quizTopics: List<QuizTopic>,
     isTopicsLoading: Boolean,
     errorMessage: String?,
-    onRefreshIconClick: () -> Unit
+    onRefreshIconClick: () -> Unit,
+    onTopicCardClick: (Int) -> Unit
 ) {
     Column(modifier = modifier) {
         Text(
@@ -164,7 +167,7 @@ private fun QuizTopicSection(
                                 .height(120.dp),
                             topicName = topic.name,
                             imageUrl = topic.imageUrl,
-                            onClick = {}
+                            onClick = { onTopicCardClick(topic.code) }
                         )
                     }
                 }
@@ -187,6 +190,7 @@ private fun PreviewDashboardScreen() {
         isLoading = false
     )
     DashboardScreen(
-        state = state
+        state = state,
+        onTopicCardClick = {}
     )
 }

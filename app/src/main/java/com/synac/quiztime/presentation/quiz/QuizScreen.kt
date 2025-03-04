@@ -39,7 +39,9 @@ import com.synac.quiztime.presentation.quiz.component.SubmitQuizDialog
 
 @Composable
 fun QuizScreen(
-    state: QuizState
+    state: QuizState,
+    navigationToDashboardScreen: () -> Unit,
+    navigationToResultScreen: () -> Unit,
 ) {
 
     SubmitQuizDialog(
@@ -58,8 +60,8 @@ fun QuizScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         QuizScreenTopBar(
-            title = state.topBarTitle,
-            onExitQuizButtonClick = {}
+            title = "${state.topBarTitle} ",
+            onExitQuizButtonClick = navigationToDashboardScreen
         )
         if (state.isLoading) {
             QuizScreenLoadingContent(
@@ -86,7 +88,8 @@ fun QuizScreen(
 
                 else -> {
                     QuizScreenContent(
-                        state = state
+                        state = state,
+                        onSubmitButtonClick = navigationToResultScreen
                     )
                 }
             }
@@ -99,7 +102,8 @@ fun QuizScreen(
 @Composable
 private fun QuizScreenContent(
     modifier: Modifier = Modifier,
-    state: QuizState
+    state: QuizState,
+    onSubmitButtonClick: () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxSize()
@@ -129,7 +133,7 @@ private fun QuizScreenContent(
             isNextButtonEnable = state.currentQuestionIndex != state.questions.lastIndex,
             onPreviousButtonClick = {},
             onNextButtonClick = {},
-            onSubmitButtonClick = {}
+            onSubmitButtonClick = onSubmitButtonClick
         )
     }
 }
@@ -265,6 +269,8 @@ private fun PreviewQuizScreen() {
         state = QuizState(
             questions = dummyQuestions,
             answers = dummyAnswers
-        )
+        ),
+        navigationToResultScreen = {},
+        navigationToDashboardScreen = {}
     )
 }
