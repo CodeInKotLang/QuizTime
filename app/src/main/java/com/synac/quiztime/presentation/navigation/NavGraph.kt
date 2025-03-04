@@ -1,6 +1,9 @@
 package com.synac.quiztime.presentation.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,9 +21,11 @@ import com.synac.quiztime.presentation.result.ResultState
 
 @Composable
 fun NavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    paddingValues: PaddingValues
 ) {
     NavHost(
+        modifier = Modifier.padding(paddingValues),
         navController = navController,
         startDestination = Route.DashboardScreen
     ) {

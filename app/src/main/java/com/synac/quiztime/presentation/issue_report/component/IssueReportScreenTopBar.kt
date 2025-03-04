@@ -1,5 +1,6 @@
 package com.synac.quiztime.presentation.issue_report.component
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +20,7 @@ fun IssueReportScreenTopBar(
     onBackButtonClick: () -> Unit
 ) {
     TopAppBar(
+        windowInsets = WindowInsets(0),
         modifier = modifier,
         title = { Text(text = title) },
         navigationIcon = {
