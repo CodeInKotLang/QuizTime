@@ -3,15 +3,17 @@ package com.synac.quiztime.presentation.navigation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.synac.quiztime.domain.model.QuizQuestion
-import com.synac.quiztime.domain.model.QuizTopic
 import com.synac.quiztime.presentation.dashboard.DashboardScreen
-import com.synac.quiztime.presentation.dashboard.DashboardState
+import com.synac.quiztime.presentation.dashboard.DashboardViewModel
 import com.synac.quiztime.presentation.issue_report.IssueReportScreen
 import com.synac.quiztime.presentation.issue_report.IssueReportState
 import com.synac.quiztime.presentation.quiz.QuizScreen
@@ -40,11 +42,10 @@ fun NavGraph(
             )
         }
         composable<Route.DashboardScreen> {
-            val dummyTopics = List(size = 20) { index ->
-                QuizTopic(id = "1", name = "Android $index", imageUrl = "", code = index)
-            }
+            val viewModel = viewModel<DashboardViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
             DashboardScreen(
-                state = DashboardState(quizTopics = dummyTopics),
+                state = state,
                 onTopicCardClick = { topicCode ->
                     navController.navigate(Route.QuizScreen(topicCode))
                 }
