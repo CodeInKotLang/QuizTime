@@ -17,7 +17,7 @@ import com.synac.quiztime.presentation.dashboard.DashboardViewModel
 import com.synac.quiztime.presentation.issue_report.IssueReportScreen
 import com.synac.quiztime.presentation.issue_report.IssueReportState
 import com.synac.quiztime.presentation.quiz.QuizScreen
-import com.synac.quiztime.presentation.quiz.QuizState
+import com.synac.quiztime.presentation.quiz.QuizViewModel
 import com.synac.quiztime.presentation.result.ResultScreen
 import com.synac.quiztime.presentation.result.ResultState
 
@@ -53,11 +53,10 @@ fun NavGraph(
         }
         composable<Route.QuizScreen> {
             val topicCode = it.toRoute<Route.QuizScreen>().topicCode
+            val viewModel = viewModel<QuizViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
             QuizScreen(
-                state = QuizState(
-                    topBarTitle = "Topic Code -> $topicCode",
-                    questions = dummyQuestions
-                ),
+                state = state,
                 navigationToDashboardScreen = {
                     navController.navigateUp()
                 },

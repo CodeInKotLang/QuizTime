@@ -2,9 +2,8 @@ package com.synac.quiztime.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.synac.quiztime.data.mapper.toQuizTopics
-import com.synac.quiztime.data.remote.HttpClientFactory
-import com.synac.quiztime.data.remote.KtorRemoteQuizDataSource
+import com.synac.quiztime.data.repository.QuizTopicRepositoryImpl
+import com.synac.quiztime.domain.repository.QuizTopicRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -15,8 +14,8 @@ class DashboardViewModel : ViewModel() {
     private val _state = MutableStateFlow(DashboardState())
     val state = _state.asStateFlow()
 
-    private val httpClient = HttpClientFactory.create()
-    private val remoteDataSource = KtorRemoteQuizDataSource(httpClient)
+    private val quizTopicRepository: QuizTopicRepository = QuizTopicRepositoryImpl()
+
 
     init {
         getQuizTopics()
@@ -26,11 +25,9 @@ class DashboardViewModel : ViewModel() {
 
     private fun getQuizTopics() {
         viewModelScope.launch {
-            val quizTopicsDto = remoteDataSource.getQuizTopics()
-            if (quizTopicsDto != null) {
-                _state.update {
-                    it.copy(quizTopics = quizTopicsDto.toQuizTopics())
-                }
+            val quizTopics = quizTopicRepository.getQuizTopics()
+            if (quizTopics != null) {
+                _state.update { it.copy(quizTopics = quizTopics) }
             }
         }
     }
