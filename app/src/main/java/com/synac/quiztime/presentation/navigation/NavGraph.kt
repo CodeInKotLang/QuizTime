@@ -57,6 +57,7 @@ fun NavGraph(
             val state by viewModel.state.collectAsStateWithLifecycle()
             QuizScreen(
                 state = state,
+                onAction = viewModel::onAction,
                 navigationToDashboardScreen = {
                     navController.navigateUp()
                 },

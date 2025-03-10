@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -24,6 +26,8 @@ import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
@@ -42,6 +46,7 @@ fun QuizScreen(
     state: QuizState,
     navigationToDashboardScreen: () -> Unit,
     navigationToResultScreen: () -> Unit,
+    onAction: (QuizAction) -> Unit
 ) {
 
     SubmitQuizDialog(
@@ -89,6 +94,7 @@ fun QuizScreen(
                 else -> {
                     QuizScreenContent(
                         state = state,
+                        onAction = onAction,
                         onSubmitButtonClick = navigationToResultScreen
                     )
                 }
@@ -103,8 +109,24 @@ fun QuizScreen(
 private fun QuizScreenContent(
     modifier: Modifier = Modifier,
     state: QuizState,
+    onAction: (QuizAction) -> Unit,
     onSubmitButtonClick: () -> Unit
 ) {
+
+    val pagerState = rememberPagerState(
+        pageCount = { state.questions.size }
+    )
+
+    LaunchedEffect(key1 = pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { pageIndex ->
+            onAction(QuizAction.JumpToQuestion(pageIndex))
+        }
+    }
+
+    LaunchedEffect(key1 = state.currentQuestionIndex) {
+        pagerState.animateScrollToPage(state.currentQuestionIndex)
+    }
+
     Column(
         modifier = modifier.fillMaxSize()
     ) {
@@ -112,27 +134,36 @@ private fun QuizScreenContent(
             currentQuestionIndex = state.currentQuestionIndex,
             questions = state.questions,
             answers = state.answers,
-            onTabSelected = {}
+            onTabSelected = { index ->
+                onAction(QuizAction.JumpToQuestion(index))
+            }
         )
         Spacer(modifier = Modifier.height(20.dp))
-        QuestionItem(
-            modifier = Modifier
-                .weight(1f)
-                .padding(15.dp)
-                .verticalScroll(rememberScrollState()),
-            currentQuestionIndex = state.currentQuestionIndex,
-            questions = state.questions,
-            answers = state.answers,
-            onOptionSelected = { _, _ -> }
-        )
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f)
+        ) {
+            QuestionItem(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(15.dp)
+                    .verticalScroll(rememberScrollState()),
+                currentQuestionIndex = state.currentQuestionIndex,
+                questions = state.questions,
+                answers = state.answers,
+                onOptionSelected = { questionId, option ->
+                    onAction(QuizAction.OnOptionSelected(questionId, option))
+                }
+            )
+        }
         QuizSubmitButtons(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp),
             isPreviousButtonEnable = state.currentQuestionIndex != 0,
             isNextButtonEnable = state.currentQuestionIndex != state.questions.lastIndex,
-            onPreviousButtonClick = {},
-            onNextButtonClick = {},
+            onPreviousButtonClick = { onAction(QuizAction.PrevQuestionButtonClick) },
+            onNextButtonClick = { onAction(QuizAction.NextQuestionButtonClick) },
             onSubmitButtonClick = onSubmitButtonClick
         )
     }
@@ -271,6 +302,7 @@ private fun PreviewQuizScreen() {
             answers = dummyAnswers
         ),
         navigationToResultScreen = {},
-        navigationToDashboardScreen = {}
+        navigationToDashboardScreen = {},
+        onAction = {}
     )
 }

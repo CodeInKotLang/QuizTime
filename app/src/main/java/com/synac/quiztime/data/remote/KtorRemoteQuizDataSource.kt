@@ -23,7 +23,7 @@ class KtorRemoteQuizDataSource(
 
     suspend fun getQuizQuestions(): List<QuizQuestionDto>? {
         return try {
-            val response = httpClient.get(urlString = "$BASE_URL/quiz/questions")
+            val response = httpClient.get(urlString = "$BASE_URL/quiz/questions/random")
             response.body<List<QuizQuestionDto>>()
         } catch (e: Exception) {
             e.printStackTrace()
