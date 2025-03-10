@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -28,7 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.synac.quiztime.R
 import com.synac.quiztime.domain.model.QuizQuestion
@@ -45,15 +44,13 @@ fun ResultScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+            modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(10.dp)
         ) {
             item {
                 Scorecard(
                     modifier = Modifier
-                        .widthIn(max = 400.dp)
+                        .fillMaxWidth()
                         .padding(vertical = 80.dp, horizontal = 10.dp),
                     scorePercentage = state.scorePercentage,
                     correctAnswerCount = state.correctAnswerCount,
@@ -187,8 +184,8 @@ private fun QuestionItem(
     }
 }
 
-//@Preview(showBackground = true)
-@PreviewScreenSizes
+//@PreviewScreenSizes
+@Preview(showBackground = true)
 @Composable
 private fun PreviewResultScreen() {
     val dummyQuestions = List(size = 10) { index ->
