@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.synac.quiztime.domain.model.UserAnswer
 import com.synac.quiztime.domain.repository.QuizQuestionRepository
+import com.synac.quiztime.domain.util.onFailure
+import com.synac.quiztime.domain.util.onSuccess
+import com.synac.quiztime.presentation.util.getErrorMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -55,10 +58,23 @@ class QuizViewModel(
 
     private fun getQuizQuestions() {
         viewModelScope.launch {
-            val quizQuestions = questionRepository.getQuizQuestions()
-            if (quizQuestions != null) {
-                _state.update { it.copy(questions = quizQuestions) }
-            }
+            questionRepository.getQuizQuestions()
+                .onSuccess { questions ->
+                    _state.update {
+                        it.copy(
+                            questions = questions,
+                            errorMessage = null
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            questions = emptyList(),
+                            errorMessage = error.getErrorMessage()
+                        )
+                    }
+                }
         }
     }
 

@@ -3,6 +3,9 @@ package com.synac.quiztime.presentation.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.synac.quiztime.domain.repository.QuizTopicRepository
+import com.synac.quiztime.domain.util.onFailure
+import com.synac.quiztime.domain.util.onSuccess
+import com.synac.quiztime.presentation.util.getErrorMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,13 +23,28 @@ class DashboardViewModel(
     }
 
 
-
     private fun getQuizTopics() {
         viewModelScope.launch {
-            val quizTopics = topicRepository.getQuizTopics()
-            if (quizTopics != null) {
-                _state.update { it.copy(quizTopics = quizTopics) }
-            }
+            _state.update { it.copy(isLoading = true) }
+            topicRepository.getQuizTopics()
+                .onSuccess { topics ->
+                    _state.update {
+                        it.copy(
+                            quizTopics = topics,
+                            errorMessage = null,
+                            isLoading = false
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            quizTopics = emptyList(),
+                            errorMessage = error.getErrorMessage(),
+                            isLoading = false
+                        )
+                    }
+                }
         }
     }
 
