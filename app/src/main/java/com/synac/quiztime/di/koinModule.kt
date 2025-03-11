@@ -1,5 +1,7 @@
 package com.synac.quiztime.di
 
+import com.synac.quiztime.data.local.DatabaseFactory
+import com.synac.quiztime.data.local.QuizDatabase
 import com.synac.quiztime.data.remote.HttpClientFactory
 import com.synac.quiztime.data.remote.KtorRemoteQuizDataSource
 import com.synac.quiztime.data.remote.RemoteQuizDataSource
@@ -19,6 +21,9 @@ val koinModule = module {
     single { HttpClientFactory.create() }
 
     singleOf(::KtorRemoteQuizDataSource).bind<RemoteQuizDataSource>()
+
+    single { DatabaseFactory.create(get()) }
+    single { get<QuizDatabase>().quizTopicDao() }
 
     singleOf(::QuizQuestionRepositoryImpl).bind<QuizQuestionRepository>()
     singleOf(::QuizTopicRepositoryImpl).bind<QuizTopicRepository>()
