@@ -9,7 +9,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.synac.quiztime.domain.model.QuizQuestion
 import com.synac.quiztime.presentation.dashboard.DashboardScreen
 import com.synac.quiztime.presentation.dashboard.DashboardViewModel
@@ -18,7 +17,7 @@ import com.synac.quiztime.presentation.issue_report.IssueReportState
 import com.synac.quiztime.presentation.quiz.QuizScreen
 import com.synac.quiztime.presentation.quiz.QuizViewModel
 import com.synac.quiztime.presentation.result.ResultScreen
-import com.synac.quiztime.presentation.result.ResultState
+import com.synac.quiztime.presentation.result.ResultViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -69,8 +68,11 @@ fun NavGraph(
             )
         }
         composable<Route.ResultScreen> {
+            val viewModel = koinViewModel<ResultViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
             ResultScreen(
-                state = ResultState(quizQuestions = dummyQuestions),
+                state = state,
+                event = viewModel.event,
                 onReportIconClick = { questionId ->
                     navController.navigate(Route.IssueReportScreen(questionId))
                 },

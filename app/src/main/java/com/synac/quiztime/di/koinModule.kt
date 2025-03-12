@@ -11,6 +11,7 @@ import com.synac.quiztime.domain.repository.QuizQuestionRepository
 import com.synac.quiztime.domain.repository.QuizTopicRepository
 import com.synac.quiztime.presentation.dashboard.DashboardViewModel
 import com.synac.quiztime.presentation.quiz.QuizViewModel
+import com.synac.quiztime.presentation.result.ResultViewModel
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
@@ -24,11 +25,13 @@ val koinModule = module {
 
     single { DatabaseFactory.create(get()) }
     single { get<QuizDatabase>().quizTopicDao() }
+    single { get<QuizDatabase>().quizQuestionDao() }
 
     singleOf(::QuizQuestionRepositoryImpl).bind<QuizQuestionRepository>()
     singleOf(::QuizTopicRepositoryImpl).bind<QuizTopicRepository>()
 
     viewModelOf(::QuizViewModel)
     viewModelOf(::DashboardViewModel)
+    viewModelOf(::ResultViewModel)
 
 }

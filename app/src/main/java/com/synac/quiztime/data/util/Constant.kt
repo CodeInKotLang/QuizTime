@@ -6,5 +6,6 @@ object Constant {
 
     const val DATABASE_NAME = "quiz.db"
     const val QUIZ_TOPIC_TABLE_NAME = "quiz_topics"
+    const val QUIZ_QUESTION_TABLE_NAME = "quiz_questions"
 
 }

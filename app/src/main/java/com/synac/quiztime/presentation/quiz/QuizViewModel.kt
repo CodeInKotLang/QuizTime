@@ -107,7 +107,7 @@ class QuizViewModel(
     }
 
     private suspend fun getQuizQuestions(topicCode: Int) {
-        questionRepository.getQuizQuestions(topicCode)
+        questionRepository.fetchAndSaveQuizQuestions(topicCode)
             .onSuccess { questions ->
                 _state.update {
                     it.copy(
