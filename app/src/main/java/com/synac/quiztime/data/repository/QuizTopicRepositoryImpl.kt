@@ -1,6 +1,7 @@
 package com.synac.quiztime.data.repository
 
 import com.synac.quiztime.data.local.dao.QuizTopicDao
+import com.synac.quiztime.data.mapper.entityToQuizTopic
 import com.synac.quiztime.data.mapper.entityToQuizTopics
 import com.synac.quiztime.data.mapper.toQuizTopics
 import com.synac.quiztime.data.mapper.toQuizTopicsEntity
@@ -34,4 +35,16 @@ class QuizTopicRepositoryImpl(
         }
     }
 
+    override suspend fun getQuizTopicByCode(topicCode: Int): Result<QuizTopic, DataError> {
+        return try {
+            val topicEntity = topicDao.getQuizTopicByCode(topicCode)
+            if (topicEntity != null) {
+                Result.Success(topicEntity.entityToQuizTopic())
+            } else {
+                Result.Failure(DataError.Unknown(errorMessage = "Quiz Topic not found."))
+            }
+        } catch (e: Exception) {
+            Result.Failure(DataError.Unknown(e.message))
+        }
+    }
 }

@@ -11,8 +11,8 @@ class QuizQuestionRepositoryImpl(
     private val remoteDataSource: RemoteQuizDataSource
 ): QuizQuestionRepository {
 
-    override suspend fun getQuizQuestions(): Result<List<QuizQuestion>, DataError> {
-        return when(val result = remoteDataSource.getQuizQuestions()) {
+    override suspend fun getQuizQuestions(topicCode: Int): Result<List<QuizQuestion>, DataError> {
+        return when(val result = remoteDataSource.getQuizQuestions(topicCode)) {
             is Result.Success -> {
                 val questionsDto = result.data
                 Result.Success(questionsDto.toQuizQuestions())

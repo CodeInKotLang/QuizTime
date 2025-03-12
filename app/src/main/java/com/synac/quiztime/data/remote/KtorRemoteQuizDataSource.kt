@@ -7,6 +7,7 @@ import com.synac.quiztime.domain.util.DataError
 import com.synac.quiztime.domain.util.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 
 class KtorRemoteQuizDataSource(
     private val httpClient: HttpClient
@@ -18,9 +19,11 @@ class KtorRemoteQuizDataSource(
         }
     }
 
-    override suspend fun getQuizQuestions(): Result<List<QuizQuestionDto>, DataError> {
+    override suspend fun getQuizQuestions(topicCode: Int): Result<List<QuizQuestionDto>, DataError> {
         return safeCall<List<QuizQuestionDto>> {
-            httpClient.get(urlString = "$BASE_URL/quiz/questions/random")
+            httpClient.get(urlString = "$BASE_URL/quiz/questions/random") {
+                parameter("topicCode", topicCode)
+            }
         }
     }
 

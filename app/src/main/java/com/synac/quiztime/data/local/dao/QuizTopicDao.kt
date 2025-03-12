@@ -19,6 +19,6 @@ interface QuizTopicDao {
     suspend fun clearAllQuizTopics()
 
     @Query("SELECT * FROM quiz_topics WHERE code = :topicCode")
-    suspend fun getQuizTopicByCode(topicCode: Int): QuizTopicEntity
+    suspend fun getQuizTopicByCode(topicCode: Int): QuizTopicEntity?
 
 }

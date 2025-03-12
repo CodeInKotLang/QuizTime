@@ -9,6 +9,6 @@ interface RemoteQuizDataSource {
 
     suspend fun getQuizTopics(): Result<List<QuizTopicDto>, DataError>
 
-    suspend fun getQuizQuestions(): Result<List<QuizQuestionDto>, DataError>
+    suspend fun getQuizQuestions(topicCode: Int): Result<List<QuizQuestionDto>, DataError>
 
 }

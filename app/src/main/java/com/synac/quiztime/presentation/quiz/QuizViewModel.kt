@@ -1,26 +1,39 @@
 package com.synac.quiztime.presentation.quiz
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.synac.quiztime.domain.model.UserAnswer
 import com.synac.quiztime.domain.repository.QuizQuestionRepository
+import com.synac.quiztime.domain.repository.QuizTopicRepository
 import com.synac.quiztime.domain.util.onFailure
 import com.synac.quiztime.domain.util.onSuccess
+import com.synac.quiztime.presentation.navigation.Route
 import com.synac.quiztime.presentation.util.getErrorMessage
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class QuizViewModel(
-    private val questionRepository: QuizQuestionRepository
+    savedStateHandle: SavedStateHandle,
+    private val questionRepository: QuizQuestionRepository,
+    private val topicRepository: QuizTopicRepository
 ) : ViewModel() {
+
+    private val topicCode = savedStateHandle.toRoute<Route.QuizScreen>().topicCode
 
     private val _state = MutableStateFlow(QuizState())
     val state = _state.asStateFlow()
 
+    private val _event = Channel<QuizEvent>()
+    val event = _event.receiveAsFlow()
+
     init {
-        getQuizQuestions()
+        setupQuiz()
     }
 
     fun onAction(action: QuizAction) {
@@ -53,29 +66,74 @@ class QuizViewModel(
                 }
                 _state.update { it.copy(answers = currentAnswers) }
             }
+
+            QuizAction.ExitQuizButtonClick -> {
+                _state.update { it.copy(isExitQuizDialogOpen = true) }
+            }
+            QuizAction.ExitQuizDialogDismiss -> {
+                _state.update { it.copy(isExitQuizDialogOpen = false) }
+            }
+            QuizAction.ExitQuizConfirmButtonClick -> {
+                _state.update { it.copy(isExitQuizDialogOpen = false) }
+                _event.trySend(QuizEvent.NavigateToDashboardScreen)
+            }
+            QuizAction.SubmitQuizButtonClick -> {
+                _state.update { it.copy(isSubmitQuizDialogOpen = true) }
+            }
+            QuizAction.SubmitQuizDialogDismiss -> {
+                _state.update { it.copy(isSubmitQuizDialogOpen = false) }
+            }
+            QuizAction.SubmitQuizConfirmButtonClick -> {
+                _state.update { it.copy(isSubmitQuizDialogOpen = false) }
+                _event.trySend(QuizEvent.NavigateToResultScreen)
+            }
+            QuizAction.Refresh -> {
+                setupQuiz()
+            }
         }
     }
 
-    private fun getQuizQuestions() {
+    private fun setupQuiz() {
         viewModelScope.launch {
-            questionRepository.getQuizQuestions()
-                .onSuccess { questions ->
-                    _state.update {
-                        it.copy(
-                            questions = questions,
-                            errorMessage = null
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(
-                            questions = emptyList(),
-                            errorMessage = error.getErrorMessage()
-                        )
-                    }
-                }
+            _state.update {
+                it.copy(isLoading = true, loadingMessage = "Setting up Quiz...")
+            }
+            getQuizTopicName(topicCode)
+            getQuizQuestions(topicCode)
+            _state.update {
+                it.copy(isLoading = false, loadingMessage = null)
+            }
         }
+    }
+
+    private suspend fun getQuizQuestions(topicCode: Int) {
+        questionRepository.getQuizQuestions(topicCode)
+            .onSuccess { questions ->
+                _state.update {
+                    it.copy(
+                        questions = questions,
+                        errorMessage = null
+                    )
+                }
+            }
+            .onFailure { error ->
+                _state.update {
+                    it.copy(
+                        questions = emptyList(),
+                        errorMessage = error.getErrorMessage()
+                    )
+                }
+            }
+    }
+
+    private suspend fun getQuizTopicName(topicCode: Int) {
+        topicRepository.getQuizTopicByCode(topicCode)
+            .onSuccess { topic ->
+                _state.update { it.copy(topBarTitle = topic.name + " Quiz") }
+            }
+            .onFailure { error ->
+                _event.send(QuizEvent.ShowToast(error.getErrorMessage()))
+            }
     }
 
 

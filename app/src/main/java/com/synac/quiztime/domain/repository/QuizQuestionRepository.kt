@@ -6,6 +6,6 @@ import com.synac.quiztime.domain.util.Result
 
 interface QuizQuestionRepository {
 
-    suspend fun getQuizQuestions(): Result<List<QuizQuestion>, DataError>
+    suspend fun getQuizQuestions(topicCode: Int): Result<List<QuizQuestion>, DataError>
 
 }
