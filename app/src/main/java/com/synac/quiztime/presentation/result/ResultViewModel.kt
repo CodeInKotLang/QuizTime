@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class ResultViewModel(
     private val questionRepository: QuizQuestionRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _state = MutableStateFlow(ResultState())
     val state = _state.asStateFlow()
@@ -24,18 +24,55 @@ class ResultViewModel(
     val event = _event.receiveAsFlow()
 
     init {
-        getAllQuestions()
+        fetchData()
     }
 
-    private fun getAllQuestions() {
+    private fun fetchData() {
         viewModelScope.launch {
-            questionRepository.getQuizQuestions()
-                .onSuccess { questions ->
-                    _state.update { it.copy(quizQuestions = questions) }
-                }
-                .onFailure { error ->
-                    _event.send(ResultEvent.ShowToast(error.getErrorMessage()))
-                }
+            getQuizQuestions()
+            getUserAnswers()
+            updateResult()
+        }
+    }
+
+    private suspend fun getQuizQuestions() {
+        questionRepository.getQuizQuestions()
+            .onSuccess { questions ->
+                _state.update { it.copy(quizQuestions = questions) }
+            }
+            .onFailure { error ->
+                _event.send(ResultEvent.ShowToast(error.getErrorMessage()))
+            }
+    }
+
+    private suspend fun getUserAnswers() {
+        questionRepository.getUserAnswers()
+            .onSuccess { answers ->
+                _state.update { it.copy(userAnswers = answers) }
+            }
+            .onFailure { error ->
+                _event.send(ResultEvent.ShowToast(error.getErrorMessage()))
+            }
+    }
+
+    private fun updateResult() {
+        val quizQuestions = state.value.quizQuestions
+        val userAnswers = state.value.userAnswers
+        val totalQuestions = quizQuestions.size
+        val correctAnswersCount = userAnswers.count { answer ->
+            val question = quizQuestions.find { it.id == answer.questionId }
+            question?.correctAnswer == answer.selectedOption
+        }
+        val scorePercentage = if (totalQuestions > 0) {
+            (correctAnswersCount * 100) / totalQuestions
+        } else 0
+
+        _state.update {
+            it.copy(
+                totalQuestions = totalQuestions,
+                correctAnswerCount = correctAnswersCount,
+                scorePercentage = scorePercentage
+            )
         }
     }
 
