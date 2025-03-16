@@ -9,11 +9,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.synac.quiztime.domain.model.QuizQuestion
 import com.synac.quiztime.presentation.dashboard.DashboardScreen
 import com.synac.quiztime.presentation.dashboard.DashboardViewModel
 import com.synac.quiztime.presentation.issue_report.IssueReportScreen
-import com.synac.quiztime.presentation.issue_report.IssueReportState
+import com.synac.quiztime.presentation.issue_report.IssueReportViewModel
 import com.synac.quiztime.presentation.quiz.QuizScreen
 import com.synac.quiztime.presentation.quiz.QuizViewModel
 import com.synac.quiztime.presentation.result.ResultScreen
@@ -30,16 +29,6 @@ fun NavGraph(
         navController = navController,
         startDestination = Route.DashboardScreen
     ) {
-        val dummyQuestions = List(size = 10) { index ->
-            QuizQuestion(
-                id = "$index",
-                topicCode = 1,
-                question = "What is the language for Android Dev?",
-                allOptions = listOf("Java", "Python", "Dart", "Kotlin"),
-                correctAnswer = "Kotlin",
-                explanation = "Some Explanation"
-            )
-        }
         composable<Route.DashboardScreen> {
             val viewModel = koinViewModel<DashboardViewModel>()
             val state by viewModel.state.collectAsStateWithLifecycle()
@@ -84,11 +73,13 @@ fun NavGraph(
             )
         }
         composable<Route.IssueReportScreen> {
+            val viewModel = koinViewModel<IssueReportViewModel>()
+            val state by viewModel.state.collectAsStateWithLifecycle()
             IssueReportScreen(
-                state = IssueReportState(
-                    quizQuestion = dummyQuestions[0]
-                ),
-                onBackButtonClick = {
+                state = state,
+                event = viewModel.event,
+                onAction = viewModel::onAction,
+                navigateBack = {
                     navController.navigateUp()
                 }
             )

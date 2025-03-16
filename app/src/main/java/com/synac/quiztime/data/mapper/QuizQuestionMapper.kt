@@ -22,7 +22,7 @@ private fun QuizQuestionDto.toQuizQuestionEntity() = QuizQuestionEntity(
     explanation = explanation
 )
 
-private fun QuizQuestionEntity.entityToQuizQuestion() = QuizQuestion(
+fun QuizQuestionEntity.entityToQuizQuestion() = QuizQuestion(
     id = id,
     topicCode = topicCode,
     question = question,

@@ -90,7 +90,7 @@ fun QuestionCard(
                         }
                         Text(
                             modifier = Modifier.padding(top = 10.dp),
-                            text = question?.explanation.orEmpty(),
+                            text = "Explanation: ${question?.explanation.orEmpty()}",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }

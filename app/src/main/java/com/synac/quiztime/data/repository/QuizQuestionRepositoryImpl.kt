@@ -2,6 +2,7 @@ package com.synac.quiztime.data.repository
 
 import com.synac.quiztime.data.local.dao.QuizQuestionDao
 import com.synac.quiztime.data.local.dao.UserAnswerDao
+import com.synac.quiztime.data.mapper.entityToQuizQuestion
 import com.synac.quiztime.data.mapper.entityToQuizQuestions
 import com.synac.quiztime.data.mapper.toQuizQuestions
 import com.synac.quiztime.data.mapper.toQuizQuestionsEntity
@@ -40,6 +41,19 @@ class QuizQuestionRepositoryImpl(
                 Result.Success(questionsEntity.entityToQuizQuestions())
             } else {
                 Result.Failure(DataError.Unknown(errorMessage = "No Quiz Questions Found."))
+            }
+        } catch (e: Exception) {
+            Result.Failure(DataError.Unknown(e.message))
+        }
+    }
+
+    override suspend fun getQuizQuestionById(questionId: String): Result<QuizQuestion, DataError> {
+        return try {
+            val questionEntity = questionDao.getQuizQuestionById(questionId)
+            if (questionEntity != null) {
+                Result.Success(questionEntity.entityToQuizQuestion())
+            } else {
+                Result.Failure(DataError.Unknown(errorMessage = "Quiz Question not found"))
             }
         } catch (e: Exception) {
             Result.Failure(DataError.Unknown(e.message))
