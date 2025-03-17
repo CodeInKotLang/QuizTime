@@ -14,16 +14,17 @@ import com.synac.quiztime.domain.util.Result
 class QuizTopicRepositoryImpl(
     private val remoteDataSource: RemoteQuizDataSource,
     private val topicDao: QuizTopicDao
-): QuizTopicRepository {
+) : QuizTopicRepository {
 
     override suspend fun getQuizTopics(): Result<List<QuizTopic>, DataError> {
-        return when(val result = remoteDataSource.getQuizTopics()) {
+        return when (val result = remoteDataSource.getQuizTopics()) {
             is Result.Success -> {
                 val quizTopicsDto = result.data
                 topicDao.clearAllQuizTopics()
                 topicDao.insertQuizTopics(quizTopicsDto.toQuizTopicsEntity())
                 Result.Success(quizTopicsDto.toQuizTopics())
             }
+
             is Result.Failure -> {
                 val cachedTopic = topicDao.getAllQuizTopics()
                 if (cachedTopic.isNotEmpty()) {

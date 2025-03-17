@@ -17,4 +17,5 @@ class IssueReportRepositoryImpl(
         val reportDto = report.toIssueReportDto()
         return remoteDataSource.insertIssueReport(reportDto)
     }
+
 }

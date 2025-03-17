@@ -13,4 +13,5 @@ interface RemoteQuizDataSource {
     suspend fun getQuizQuestions(topicCode: Int): Result<List<QuizQuestionDto>, DataError>
 
     suspend fun insertIssueReport(report: IssueReportDto): Result<Unit, DataError>
+    
 }
