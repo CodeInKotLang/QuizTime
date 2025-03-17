@@ -38,6 +38,7 @@ import com.synac.quiztime.presentation.dashboard.component.UserStatisticsCard
 @Composable
 fun DashboardScreen(
     state: DashboardState,
+    onAction: (DashboardAction) -> Unit,
     onTopicCardClick: (Int) -> Unit
 ) {
 
@@ -45,9 +46,9 @@ fun DashboardScreen(
         isOpen = state.isNameEditDialogOpen,
         textFieldValue = state.usernameTextFieldValue,
         usernameError = state.usernameError,
-        onDialogDismiss = {},
-        onConfirmButtonClick = {},
-        onTextFieldValueChange = {}
+        onDialogDismiss = { onAction(DashboardAction.NameEditDialogDismiss) },
+        onConfirmButtonClick = { onAction(DashboardAction.NameEditDialogConfirm) },
+        onTextFieldValueChange = { onAction(DashboardAction.SetUsername(it)) }
     )
 
     Column(
@@ -58,14 +59,14 @@ fun DashboardScreen(
             username = state.username,
             questionsAttempted = state.questionsAttempted,
             correctAnswers = state.correctAnswers,
-            onEditNameClick = {}
+            onEditNameClick = { onAction(DashboardAction.NameEditIconClick) }
         )
         QuizTopicSection(
             modifier = Modifier.fillMaxWidth(),
             quizTopics = state.quizTopics,
             isTopicsLoading = state.isLoading,
             errorMessage = state.errorMessage,
-            onRefreshIconClick = {},
+            onRefreshIconClick = { onAction(DashboardAction.RefreshIconClick) },
             onTopicCardClick = onTopicCardClick
         )
     }
@@ -191,6 +192,7 @@ private fun PreviewDashboardScreen() {
     )
     DashboardScreen(
         state = state,
+        onAction = {},
         onTopicCardClick = {}
     )
 }
