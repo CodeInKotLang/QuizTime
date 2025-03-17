@@ -28,8 +28,7 @@ suspend inline fun <reified T> safeCall(
     return when (response.status.value) {
         in 200..299 -> {
             try {
-                val topicDto = response.body<T>()
-                Result.Success(topicDto)
+                Result.Success(response.body<T>())
             } catch (e: JsonConvertException) {
                 Result.Failure(DataError.Serialization)
             }  catch (e: NoTransformationFoundException) {

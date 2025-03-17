@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.synac.quiztime.domain.model.UserAnswer
 import com.synac.quiztime.domain.repository.QuizQuestionRepository
 import com.synac.quiztime.domain.repository.QuizTopicRepository
+import com.synac.quiztime.domain.repository.UserPreferencesRepository
 import com.synac.quiztime.domain.util.onFailure
 import com.synac.quiztime.domain.util.onSuccess
 import com.synac.quiztime.presentation.navigation.Route
@@ -14,6 +15,7 @@ import com.synac.quiztime.presentation.util.getErrorMessage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,7 +23,8 @@ import kotlinx.coroutines.launch
 class QuizViewModel(
     savedStateHandle: SavedStateHandle,
     private val questionRepository: QuizQuestionRepository,
-    private val topicRepository: QuizTopicRepository
+    private val topicRepository: QuizTopicRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val topicCode = savedStateHandle.toRoute<Route.QuizScreen>().topicCode
@@ -70,23 +73,29 @@ class QuizViewModel(
             QuizAction.ExitQuizButtonClick -> {
                 _state.update { it.copy(isExitQuizDialogOpen = true) }
             }
+
             QuizAction.ExitQuizDialogDismiss -> {
                 _state.update { it.copy(isExitQuizDialogOpen = false) }
             }
+
             QuizAction.ExitQuizConfirmButtonClick -> {
                 _state.update { it.copy(isExitQuizDialogOpen = false) }
                 _event.trySend(QuizEvent.NavigateToDashboardScreen)
             }
+
             QuizAction.SubmitQuizButtonClick -> {
                 _state.update { it.copy(isSubmitQuizDialogOpen = true) }
             }
+
             QuizAction.SubmitQuizDialogDismiss -> {
                 _state.update { it.copy(isSubmitQuizDialogOpen = false) }
             }
+
             QuizAction.SubmitQuizConfirmButtonClick -> {
                 _state.update { it.copy(isSubmitQuizDialogOpen = false) }
-                saveUserAnswers()
+                submitQuiz()
             }
+
             QuizAction.Refresh -> {
                 setupQuiz()
             }
@@ -136,15 +145,13 @@ class QuizViewModel(
             }
     }
 
-    private fun saveUserAnswers() {
+    private fun submitQuiz() {
         viewModelScope.launch {
             _state.update {
                 it.copy(isLoading = true, loadingMessage = "Submitting Quiz...")
             }
-            questionRepository.saveUserAnswers(state.value.answers)
-                .onFailure { error ->
-                    _event.send(QuizEvent.ShowToast(error.getErrorMessage()))
-                }
+            saveUserAnswers()
+            updateScore()
             _state.update {
                 it.copy(isLoading = false, loadingMessage = null)
             }
@@ -152,5 +159,32 @@ class QuizViewModel(
         }
     }
 
+    private suspend fun saveUserAnswers() {
+        questionRepository.saveUserAnswers(state.value.answers)
+            .onFailure { error ->
+                _event.send(QuizEvent.ShowToast(error.getErrorMessage()))
+            }
+    }
+
+    private suspend fun updateScore() {
+        val quizQuestions = state.value.questions
+        val userAnswers = state.value.answers
+
+        val correctAnswersCount = userAnswers.count { answer ->
+            val question = quizQuestions.find { it.id == answer.questionId }
+            question?.correctAnswer == answer.selectedOption
+        }
+
+        val previousAttempted = userPreferencesRepository.getQuestionsAttempted().first()
+        val previousCorrect = userPreferencesRepository.getCorrectAnswers().first()
+
+        val totalAttempted = previousAttempted + userAnswers.size
+        val totalCorrect = previousCorrect + correctAnswersCount
+
+        userPreferencesRepository.saveScore(
+            questionAttempted = totalAttempted,
+            correctAnswers = totalCorrect
+        )
+    }
 
 }
